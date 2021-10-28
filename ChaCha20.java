@@ -4,6 +4,8 @@
  * BITS F463 - Group 7
  * <p/>
  */
+import java.util.Scanner; 
+
 public class ChaCha20 {
     //Key size in bytes
     public static final int KEY_SIZE = 32;
@@ -145,8 +147,62 @@ public class ChaCha20 {
         }
     }
 
-    //ChaCha20 decryption method
-    public void decrypt(byte[] dst, byte[] src, int len) {
-        encrypt(dst, src, len);
+    public void keystream(byte[] dst, int len) {
+        for (int i = 0; i < len; ++i) dst[i] = 0;
+        this.encrypt(dst, dst, len);
+    }
+
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public static void printHexString(byte[] b) {
+        for (int i = 0; i < b.length; i++) {
+            String hex = Integer.toHexString(b[i] & 0xFF);
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            System.out.print(hex.toUpperCase());
+
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        byte[] key = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0".getBytes();
+        System.out.print("Key: ");
+        printHexString(key);
+        byte[] nonce = "\0\0\0\0\0\0\0\0\0\0\0\0".getBytes();
+
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Plaintext: ");  
+        String str = sc.nextLine();
+
+        byte[] plaintext = str.getBytes();
+
+        try {
+            ChaCha20 cipher = new ChaCha20(key, nonce, 0);
+            byte[] ret = new byte[plaintext.length];
+            cipher.encrypt(ret, plaintext, plaintext.length);
+
+            System.out.print("Encypted Data: ");
+            printHexString(ret);
+
+
+            ChaCha20 decoder = new ChaCha20(key, nonce, 0);
+            byte[] origin = new byte[ret.length];
+            decoder.encrypt(origin, ret, ret.length);
+
+            System.out.print("Decrypted Data: ");
+            System.out.println(new String(origin));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
