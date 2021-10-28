@@ -4,6 +4,7 @@
  * BITS F463 - Group 7
  * <p/>
  */
+
 import java.util.Scanner; 
 
 public class ChaCha20 {
@@ -11,7 +12,7 @@ public class ChaCha20 {
     public static final int KEY_SIZE = 32;
 
     //Nonce size in bytes
-    public static final int NONCE_SIZE_IETF = 12;
+    public static final int NONCE_SIZE = 12;
 
     private int[] matrix = new int[16];
 
@@ -86,7 +87,7 @@ public class ChaCha20 {
         this.matrix[10] = littleEndianToInt(key, 24);
         this.matrix[11] = littleEndianToInt(key, 28);
 
-        if (nonce.length == NONCE_SIZE_IETF) {
+        if (nonce.length == NONCE_SIZE) {
             this.matrix[12] = counter;
             this.matrix[13] = littleEndianToInt(nonce, 0);
             this.matrix[14] = littleEndianToInt(nonce, 4);
@@ -147,21 +148,6 @@ public class ChaCha20 {
         }
     }
 
-    public void keystream(byte[] dst, int len) {
-        for (int i = 0; i < len; ++i) dst[i] = 0;
-        this.encrypt(dst, dst, len);
-    }
-
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
     public static void printHexString(byte[] b) {
         for (int i = 0; i < b.length; i++) {
             String hex = Integer.toHexString(b[i] & 0xFF);
@@ -175,10 +161,10 @@ public class ChaCha20 {
     }
 
     public static void main(String[] args) {
-        byte[] key = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0".getBytes();
+        byte[] key = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\5".getBytes();
         System.out.print("Key: ");
         printHexString(key);
-        byte[] nonce = "\0\0\0\0\0\0\0\0\0\0\0\0".getBytes();
+        byte[] nonce = "\0\0\0\0\0\0\0\0\0\0\0\5".getBytes();
 
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Plaintext: ");  
@@ -191,7 +177,7 @@ public class ChaCha20 {
             byte[] ret = new byte[plaintext.length];
             cipher.encrypt(ret, plaintext, plaintext.length);
 
-            System.out.print("Encypted Data: ");
+            System.out.print("Encrypted Data: ");
             printHexString(ret);
 
 
