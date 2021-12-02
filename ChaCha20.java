@@ -67,12 +67,7 @@ public class ChaCha20 {
     * key      key      key      key
     * input    input    input    input
     */
-    public ChaCha20(byte[] key, byte[] nonce, int counter)
-        throws WrongKeySizeException, WrongNonceSizeException {
-
-        if (key.length != KEY_SIZE) {
-            throw new WrongKeySizeException("Key Error");
-        }
+    public ChaCha20(byte[] key, byte[] nonce, int counter){
 
         this.matrix[ 0] = 0x61707865;
         this.matrix[ 1] = 0x3320646e;
@@ -92,8 +87,6 @@ public class ChaCha20 {
             this.matrix[13] = littleEndianToInt(nonce, 0);
             this.matrix[14] = littleEndianToInt(nonce, 4);
             this.matrix[15] = littleEndianToInt(nonce, 8);
-        } else {
-            throw new WrongNonceSizeException("Nonce Error");
         }
     }
 
@@ -118,6 +111,7 @@ public class ChaCha20 {
                 quarterRound(x, 3, 4,  9, 14);
             }
 
+            //Add output words to initial matrix
             for (i = 16; i-- > 0; ) x[i] += this.matrix[i];
             for (i = 16; i-- > 0; ) intToLittleEndian(x[i], output, 4 * i);
 
@@ -136,6 +130,7 @@ public class ChaCha20 {
                 return;
             }
 
+            //Loop to XOR complete 64-byte blocks
             for (i = 64; i-- > 0; ) {
                 dst[i + dpos] = (byte) (src[i + spos] ^ output[i]);
             }
@@ -158,37 +153,5 @@ public class ChaCha20 {
 
         }
         System.out.println();
-    }
-
-    public static void main(String[] args) {
-        byte[] key = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\5".getBytes();
-        System.out.print("Key: ");
-        printHexString(key);
-        byte[] nonce = "\0\0\0\0\0\0\0\0\0\0\0\5".getBytes();
-
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Plaintext: ");  
-        String str = sc.nextLine();
-
-        byte[] plaintext = str.getBytes();
-
-        try {
-            ChaCha20 cipher = new ChaCha20(key, nonce, 0);
-            byte[] ret = new byte[plaintext.length];
-            cipher.encrypt(ret, plaintext, plaintext.length);
-
-            System.out.print("Encrypted Data: ");
-            printHexString(ret);
-
-
-            ChaCha20 decoder = new ChaCha20(key, nonce, 0);
-            byte[] origin = new byte[ret.length];
-            decoder.encrypt(origin, ret, ret.length);
-
-            System.out.print("Decrypted Data: ");
-            System.out.println(new String(origin));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
